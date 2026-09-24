@@ -1,0 +1,11 @@
+[package]
+name = "kjell-thesis-LU"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Truls Henriksson"]
+license = "MIT"
+description = "Bachelor's or Master's thesis at Lund University."
+repository = "TBA"
+keywords = ["thesis", "Lund", "LU", "LTH"]
+categories = ["thesis"]
+disciplines = ["mathematics", "physics", "engineering", "computer-science"]
