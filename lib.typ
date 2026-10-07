@@ -17,5 +17,5 @@
   no-number,
   thesis-style,
   codly,
-  python,
+  input-code,
 )

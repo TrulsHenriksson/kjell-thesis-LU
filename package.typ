@@ -1,22 +1,24 @@
 #import "@preview/codly:1.3.0": *
 #import "@preview/great-theorems:0.1.2": *
-#import "@preview/rich-counters:0.2.1": *
+#import "@preview/rich-counters:0.2.2": *
 
 
 // Counter that always starts with the subsection number
 #let mathcounter = rich-counter(
-  identifier: "mathblocks",
+  identifier: "mathcounter",
   inherited_levels: 2
 )
+
+// Theorem environments
+
 #let common-mathblock = mathblock.with(
   counter: mathcounter,
+  // We use the heading numbering since it changes in the appendices
+  numbering: (..nums) => numbering(heading.numbering, ..nums),
   above: 1.2em,
   below: 1.2em,
   // Format references without extra surrounding parentheses
   titlix: x => if type(x) == content and x.has("target") [#x] else [(#x)],
-)
-#let weak-mathblock = common-mathblock.with(
-  bodyfmt: emph
 )
 
 #let theorem = common-mathblock(blocktitle: "Theorem")
@@ -30,7 +32,7 @@
 #let note = common-mathblock(blocktitle: "Note", prefix: count => [_Note #count._])
 #let remark = common-mathblock(blocktitle: "Remark", prefix: count => [_Remark #count._])
 
-#let proof = proofblock()
+#let proof = proofblock(suffix: [#h(1fr) $square.filled.medium$])
 
 
 
@@ -49,12 +51,88 @@
 #let margin-inside = 3.1cm
 #let margin-outside = 5.1cm
 
+#let first-line-indent = 1.8em
+#let indent = h(first-line-indent)
 
 #let ordinal-suffix(n) = if calc.rem(n, 100) in (11, 12, 13) {
   "th"
 } else {
   ("st", "nd", "rd").at(calc.rem(n - 1, 10), default: "th")
 }
+
+
+// Add equation numbers to only the referenced equations
+#let only-number-referenced-equations(body) = context {
+  let equation-labels = query(math.equation.where(block: true))
+    .filter(eq => eq.has("label"))
+    .map(eq => eq.label)
+    .dedup()
+  
+  if equation-labels.len() == 0 {
+    return body
+  }
+  
+  let referenced-equations = query(
+    selector.or(..equation-labels.map(
+      label => ref.where(target: label)
+    ))
+  ).map(it => it.target)
+  if referenced-equations.len() == 0 {
+    return body
+  }
+
+  // Display equation numbers using the same counter as theorems.
+  // We use the heading numbering since it changes in appendices.
+  show selector.or(..referenced-equations): it => {
+    (mathcounter.step)()
+    it
+  }
+  show selector.or(..referenced-equations): set math.equation(
+    numbering: nums => context (mathcounter.display)("(" + heading.numbering + ")"),
+  )
+  // Fix the reference numbers
+  show selector.or(..equation-labels.map(
+    label => ref.where(target: label)
+  )): it => {
+    let (..nums, last) = (mathcounter.at)(it.target)
+    // The last digit is always one less than it should be (for some reason)
+    link(
+      it.element.location(),
+    )[#it.element.supplement #numbering(heading.numbering, ..nums, last + 1)]
+  }
+
+  body
+}
+
+// Adapted from https://stackoverflow.com/a/78289423
+#let section-numbering(c) = {
+  if c.numbering == none {
+    return ""
+  }
+  return numbering(c.numbering + ". ", ..counter(heading).at(c.location()))
+}
+
+// Return the chapter on the current page, and how many pages ago it started
+#let first-section-before-here(level: 1) = {
+  // The headings whose names should be shown in the headers
+  let wanted-headings = selector(heading.where(level: level))
+
+  let elems = query(wanted-headings.after(here()))
+  // Is there a heading on the same page?
+  if elems.len() != 0 and elems.first().location().page() == here().page() {
+    // Return the last available heading that is on this page
+    return (elems.filter(e => e.location().page() == here().page()).last(), 0)
+  }
+
+  elems = query(wanted-headings.before(here()))
+  if elems.len() == 0 {
+    return (none, 0)
+  }
+
+  let result = elems.last()
+  return (result, here().page() - result.location().page())
+}
+
 
 
 // Create a title page from the document data.
@@ -105,7 +183,6 @@
   counter(page).update(1)
 }
 
-
 // Create the abstract page. The title is added automatically.
 #let abstract(body) = {
   set page(header: none)
@@ -123,13 +200,11 @@
   pagebreak(to: "odd", weak: true)
 }
 
-
 // Make top-level headings unnumbered within the body.
 #let no-number(body) = {
   show heading.where(level: 1): set heading(numbering: none)
   body
 }
-
 
 // The frontmatter is numbered using lowercase Roman numerals.
 #let frontmatter(body) = {
@@ -151,58 +226,12 @@
   body
 }
 
-
-#let first-line-indent = 1.8em
-#let indent = h(first-line-indent)
-
-// Add equation numbers to only the referenced equations
-#let only-number-referenced-equations(body) = context {
-  let equation-labels = query(math.equation.where(block: true))
-    .filter(eq => eq.has("label"))
-    .map(eq => eq.label)
-    .dedup()
-  
-  if equation-labels.len() == 0 {
-    return body
-  }
-  
-  let referenced-equations = query(
-    selector.or(..equation-labels.map(
-      label => ref.where(target: label)
-    ))
-  ).map(it => it.target)
-  if referenced-equations.len() == 0 {
-    return body
-  }
-
-  // Display equation numbers using the same counter as theorems
-  show selector.or(..referenced-equations): it => {
-    (mathcounter.step)()
-    it
-  }
-  show selector.or(..referenced-equations): set math.equation(
-    numbering: nums => context (mathcounter.display)("(1.1)"),
-  )
-  // Fix the reference numbers
-  show selector.or(..equation-labels.map(
-    label => ref.where(target: label)
-  )): it => {
-    let (..nums, last) = (mathcounter.at)(it.target)
-    // The last digit is always one less than it should be (for some reason)
-    link(
-      it.element.location(),
-    )[#it.element.supplement #numbering("1.1", ..nums, last + 1)]
-  }
-
-  body
-}
-
-// Convenience function for entering Python code.
-#let python(file-path, header: none) = {
+// Convenience function for entering code.
+#let input-code(file-path, header: none, lang: "python") = {
   if header != none {
     codly(header: [#header])
   }
-  raw(read(file-path), lang: "python", block: true)
+  raw(read(file-path), lang: lang, block: true)
 }
 
 
@@ -214,34 +243,6 @@
   // Initialize packages
   show: great-theorems-init
   show: codly-init
-
-  // Adapted from https://stackoverflow.com/a/78289423
-  let section-numbering(c) = {
-    if c.numbering == none {
-      return ""
-    }
-    return numbering(c.numbering + ". ", ..counter(heading).at(c.location()))
-  }
-  // Return the chapter on the current page, and how many pages ago it started
-  let first-section-before-here(level: 1) = {
-    // The headings whose names should be shown in the headers
-    let wanted-headings = selector(heading.where(level: level))
-
-    let elems = query(wanted-headings.after(here()))
-    // Is there a heading on the same page?
-    if elems.len() != 0 and elems.first().location().page() == here().page() {
-      // Return the last available heading that is on this page
-      return (elems.filter(e => e.location().page() == here().page()).last(), 0)
-    }
-
-    elems = query(wanted-headings.before(here()))
-    if elems.len() == 0 {
-      return (none, 0)
-    }
-
-    let result = elems.last()
-    return (result, here().page() - result.location().page())
-  }
 
   // Set page style, headers and footers
   set page(
