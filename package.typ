@@ -2,6 +2,8 @@
 #import "@preview/great-theorems:0.1.2": *
 #import "@preview/rich-counters:0.2.2": *
 
+#import "localization.typ": ordinal, date-display, locale, lu-logo-path
+
 
 // Counter that always starts with the subsection number
 #let mathcounter = rich-counter(
@@ -20,19 +22,46 @@
   // Format references without extra surrounding parentheses
   titlix: x => if type(x) == content and x.has("target") [#x] else [(#x)],
 )
+#let italics-mathblock = common-mathblock.with(
+  bodyfmt: emph,
+)
 
-#let theorem = common-mathblock(blocktitle: "Theorem")
-#let proposition = common-mathblock(blocktitle: "Proposition")
-#let conjecture = common-mathblock(blocktitle: "Conjecture")
-#let lemma = common-mathblock(blocktitle: "Lemma")
-#let corollary = common-mathblock(blocktitle: "Corollary")
-#let definition = common-mathblock(blocktitle: "Definition")
+#let theorem = italics-mathblock(
+  blocktitle: context locale.at(text.lang).Theorem,
+)
+#let proposition = italics-mathblock(
+  blocktitle: context locale.at(text.lang).Proposition,
+)
+#let conjecture = italics-mathblock(
+  blocktitle: context locale.at(text.lang).Conjecture,
+)
+#let lemma = italics-mathblock(
+  blocktitle: context locale.at(text.lang).Lemma,
+)
+#let corollary = italics-mathblock(
+  blocktitle: context locale.at(text.lang).Corollary,
+)
 
-#let example = common-mathblock(blocktitle: "Example", prefix: count => [_Example #count._])
-#let note = common-mathblock(blocktitle: "Note", prefix: count => [_Note #count._])
-#let remark = common-mathblock(blocktitle: "Remark", prefix: count => [_Remark #count._])
+#let definition = common-mathblock(
+  blocktitle: context locale.at(text.lang).Definition,
+)
+#let example = common-mathblock(
+  blocktitle: context locale.at(text.lang).Example,
+  prefix: count => [_#{ context locale.at(text.lang).Example } #count._],
+)
+#let note = common-mathblock(
+  blocktitle: context locale.at(text.lang).Note,
+  prefix: count => [_#{ context locale.at(text.lang).Note } #count._],
+)
+#let remark = common-mathblock(
+  blocktitle: context locale.at(text.lang).Remark,
+  prefix: count => [_#{ context locale.at(text.lang).Remark } #count._],
+)
 
-#let proof = proofblock(suffix: [#h(1fr) $square.filled.medium$])
+#let proof = proofblock(
+  blocktitle: context locale.at(text.lang).Proof,
+  suffix: [#h(1fr) $square.filled.medium$],
+)
 
 
 
@@ -53,12 +82,6 @@
 
 #let first-line-indent = 1.8em
 #let indent = h(first-line-indent)
-
-#let ordinal-suffix(n) = if calc.rem(n, 100) in (11, 12, 13) {
-  "th"
-} else {
-  ("st", "nd", "rd").at(calc.rem(n - 1, 10), default: "th")
-}
 
 
 // Add equation numbers to only the referenced equations
@@ -153,8 +176,9 @@
   set text(size: size-large)
   set par(justify: false)
   set page(numbering: none, header: none)
-  show title: set text(size: size-huge, weight: "bold")
+  show title: set text(size: size-huge)
 
+  pagebreak(weak: true)
   grid(
     columns: (100%,),
     align: (center,),
@@ -164,17 +188,17 @@
 
     [],  // Fill the available height
 
-    [by #document.author.join([,#v(0.15em)])],
+    [#document.author.join([,#v(0.15em)])],
     v(1.2em),
-    [#document.date.display("[day padding:none]" + ordinal-suffix(document.date.day()) +  " [month repr:long] [year]")],
+    [#date-display.at(text.lang)(document.date)],
 
     [],  // Fill the available height
 
-    image("assets/LU_logo/LundUniversity_C2line/LundUniversity_C2line_BLACK.png", width: 30%),
+    image(lu-logo-path.at(text.lang), height: 24%),
     v(2em),
-    [#level Thesis in #subject],
-    v(1em),
-    [Thesis advisor: #advisor],
+    (locale.at(text.lang).Thesis-in)(level, subject),
+    v(1.2em),
+    [#locale.at(text.lang).Thesis-advisor: #advisor],
   )
   // Blank backside
   page[]
@@ -183,7 +207,7 @@
   counter(page).update(1)
 }
 
-// Create the abstract page. The title is added automatically.
+// Create the abstract page (always English). The title is added automatically.
 #let abstract(body) = {
   set page(header: none)
   show heading: set block(below: 2em)
@@ -200,9 +224,9 @@
   pagebreak(to: "odd", weak: true)
 }
 
-// Make top-level headings unnumbered within the body.
+// Make headings unnumbered within the body.
 #let no-number(body) = {
-  show heading.where(level: 1): set heading(numbering: none)
+  show heading: set heading(numbering: none)
   body
 }
 
@@ -220,7 +244,7 @@
 // Add appendices. Write the contents within the body.
 #let appendices(body) = {
   set heading(numbering: "A.1")
-  show heading.where(level: 1): set heading(supplement: "Appendix")
+  show heading.where(level: 1): set heading(supplement: context locale.at(text.lang).Appendix)
   counter(heading).update(0)
 
   body
@@ -281,7 +305,9 @@
           align(if recto { right } else { left })[
             #section-numbering(section-here)#if heading-level == 1 {
               smallcaps(section-here.body)
-            } else { section-here.body }
+            } else {
+              section-here.body
+            }
           ]
           line(length: 100%, stroke: 0.4pt)
         }
@@ -368,20 +394,19 @@
   show: only-number-referenced-equations
 
 
-
   // Style code blocks
   codly(
     header-cell-args: (align: center,), 
     header-repeat: true, 
-    header-transform: x => emph(x),
+    header-transform: emph,
     lang-format: none,
     number-align: right + horizon,
-    number-format: n => pdf.artifact(numbering("1", n), kind: "line-number"),
+    number-format: n => pdf.artifact(str(n), kind: "line-number"),
   )
 
   // Set heading styles
   set heading(numbering: "1.1")
-  show heading.where(level: 1): set heading(supplement: "Chapter")
+  show heading.where(level: 1): set heading(supplement: context locale.at(text.lang).Chapter)
   show heading.where(level: 2): set text(size: size-Large)
   show heading.where(level: 2): set block(below: 1.2em, above: 1.75em)
   show heading.where(level: 3): set text(size: size-large)
@@ -401,8 +426,8 @@
     v(5em)
     // Block here so the first paragraph isn't indented
     block(below: 3.5em)[
-      #if it.supplement.text in ("Chapter", "Appendix") and it.numbering != none {
-        // "Chapter n" on a line before the chapter title
+      #if it.numbering != none and it.outlined {
+        // "Chapter/Appendix n" on a line before the chapter title
         strong(
           text(size: size-huge)[
             #smallcaps[
@@ -413,7 +438,7 @@
             ]
             \
             \
-          ]
+          ],
         )
       } else if it.numbering != none {
         // "n." before the heading as usual
@@ -433,10 +458,7 @@
   // Set citation style
   set cite(style: "alphanumeric")
 
-  // Style tables
-  // set table(
-  //   stroke: (x, y) => if y == 0 { (top: 0.8pt, bottom: 0.8pt) } else { none },
-  // )
+  // TODO: style tables
 
 
   // Front cover page
