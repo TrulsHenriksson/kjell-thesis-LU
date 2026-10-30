@@ -1,4 +1,4 @@
-#import "package.typ": (
+#import "src/package.typ": (
   theorem, 
   proposition,
   conjecture,

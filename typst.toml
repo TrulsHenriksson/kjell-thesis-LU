@@ -9,4 +9,4 @@ repository = "TBA"
 keywords = ["thesis", "Lund", "LU", "LTH"]
 categories = ["thesis"]
 disciplines = ["mathematics", "physics", "engineering", "computer-science"]
-exclude = ["/assets/example-*.png"]
+exclude = ["/assets"]
