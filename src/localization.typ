@@ -22,12 +22,16 @@
   ),
 )
 
+#let month-names = (
+  "sv": ("Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"),
+)
+
 #let date-display = (
   "en": d => d.display(
     "[month repr:long] " + ordinal.at("en")(d.day()) + " [year]",
   ),
   "sv": d => d.display(
-    ordinal.at("sv")(d.day()) + " [month repr:long] [year]",
+    ordinal.at("sv")(d.day()) + " " + month-names.at("sv").at(d.month() - 1) + " [year]",
   ),
 )
 
