@@ -1,2 +1,6 @@
 references
 examples
+
+assets/*.typ
+assets/*.py
+assets/makefile
