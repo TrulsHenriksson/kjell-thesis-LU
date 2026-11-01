@@ -23,7 +23,7 @@
 )
 
 #let month-names = (
-  "sv": ("Januari", "Februari", "Mars", "April", "Maj", "Juni", "Juli", "Augusti", "September", "Oktober", "November", "December"),
+  "sv": ("januari", "februari", "mars", "april", "maj", "juni", "juli", "augusti", "september", "oktober", "november", "december"),
 )
 
 #let date-display = (
