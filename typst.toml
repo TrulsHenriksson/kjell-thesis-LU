@@ -10,3 +10,8 @@ keywords = ["thesis", "Lund", "LU", "LTH"]
 categories = ["thesis"]
 disciplines = ["mathematics", "physics", "engineering", "computer-science"]
 exclude = ["/assets"]
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "assets/template-thumbnail.png"

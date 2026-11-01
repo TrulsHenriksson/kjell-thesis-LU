@@ -1,6 +1,6 @@
 # kjell-thesis-LU
 
-![Example title page](./assets/example-title-page.png)
+![Example title page](./assets/template-thumbnail.png)
 
 ## Features
 - Top-level headings are chapter titles.
@@ -24,23 +24,22 @@ Typst is a typesetting system. Depending on your use case and background, Typst 
 If you haven't used it before but would like to try, check out [typst.app](https://typst.app/), visit the [playground](https://typst.app/play/), go through the [tutorial](https://typst.app/docs/tutorial/), and then create an account to start editing online. Or, since Typst is open-source, [install the compiler](https://typst.app/open-source/) and start writing in your preferred editor.
 
 ## Getting started
-Here's a starting point for a thesis:
+Run `typst init @preview/kjell-thesis-LU:0.1.0` in the directory you want the thesis project in. Otherwise, you can also use the starting point given below.
 
 ```typst
 #import "@preview/kjell-thesis-LU:0.1.0": *
 #show: thesis-style
 
-// All three fields needed for the title page
 #set document(
-  title: [My Bachelor's thesis],
-  author: "Jonathan Doerthy",
+  title: [Title of your thesis],
+  author: ("First author", "Second author"),
   date: datetime.today(),
 )
 
 #title-page(
   level: "Bachelor's",
   subject: "Mathematics",
-  advisor: "Soop R. Veizer",
+  advisor: "Supervisor name here",
 )
 
 #frontmatter[
@@ -58,11 +57,10 @@ Here's a starting point for a thesis:
 ...
 
 #appendices[
-  = Raw data
+  = First appendix
   ...
 
-  #bibliography("my-sources.yaml") // Hayagriva bibliography format
-  #bibliography("my-sources.bib")  // Or the more common BibTeX
+  #bibliography("sources.yaml") // Hayagriva bibliography format
 ]
 ```
 
@@ -138,13 +136,15 @@ Swedish localization can be enabled using `#set text(lang: "sv")`.
 ] <euclid>
 #note[
   Nyckelidén ligger i @new-prime.
-  $ p := 1 + product_(p_i "prime") p_i $ <new-prime>
+  $ p := 1 + product_(p_i "primt") p_i $ <new-prime>
 ]
 #corollary(title: [Från @euclid, med hjälp av @new-prime.])[
   Det finns inget största primtal.
 ]
 ```
 ![Swedish localization](assets/example-swedish.png)
+
+If a new paragraph isn't indented as it should be (for example, after a theorem environment), place `#indent` before the first word in the paragraph.
 
 ## Acknowledgements
 
