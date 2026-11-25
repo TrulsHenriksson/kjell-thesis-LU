@@ -1,4 +1,6 @@
-#import "@preview/kjell-thesis-LU:0.1.0": *
+#import "@preview/kjell-thesis-LU:0.1.0": thesis
+#import thesis: *
+
 #show: thesis-style.with(
   // cover-page: path("") // Include the department's cover page here when given one.
 )
@@ -50,7 +52,6 @@ This is where you write the main contents of your thesis.
   = First appendix
   ...
 
-  // Only sources you cite show up in the bibliography.
   // A BibTeX file (.bib) can be used instead of a Hayagriva file.
   #bibliography("sources.yaml")
 ]

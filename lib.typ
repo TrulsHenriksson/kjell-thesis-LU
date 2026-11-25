@@ -1,21 +1,2 @@
-#import "src/package.typ": (
-  theorem, 
-  proposition,
-  conjecture,
-  lemma,
-  corollary,
-  definition,
-  example,
-  note,
-  remark,
-  proof,
-  indent,
-  title-page,
-  abstract,
-  frontmatter,
-  appendices,
-  no-number,
-  thesis-style,
-  codly,
-  input-code,
-)
+#import "src/thesis/lib.typ" as thesis
+#import "src/presentation/lib.typ" as presentation
