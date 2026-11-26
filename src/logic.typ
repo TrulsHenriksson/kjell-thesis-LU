@@ -34,7 +34,11 @@
     it
   }
   show selector.or(..referenced-equations): set math.equation(
-    numbering: nums => context (mathcounter.display)("(" + heading.numbering + ")"),
+    numbering: nums => context if heading.numbering != none {
+      (mathcounter.display)("(" + heading.numbering + ")")
+    } else {
+      numbering("(1)", ..(mathcounter.get)().slice(2))
+    },
   )
   // Fix the reference numbers
   show selector.or(..equation-labels.map(
@@ -42,9 +46,15 @@
   )): it => {
     let (..nums, last) = (mathcounter.at)(it.target)
     // The last digit is always one less than it should be (for some reason)
+    let nums = (..nums, last + 1)
     link(
       it.element.location(),
-    )[#it.element.supplement #numbering(heading.numbering, ..nums, last + 1)]
+      if heading.numbering != none [
+        #it.element.supplement #numbering(heading.numbering, ..nums)
+      ] else [
+        #it.element.supplement #numbering("(1)", ..nums.slice(2))
+      ]
+    )
   }
 
   body
