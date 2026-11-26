@@ -1,5 +1,4 @@
 #import "@preview/codly:1.3.0": *
-// #import "@preview/great-theorems:0.1.2": *
 #import "@preview/polylux:0.4.0": *
 
 #import "../constants.typ" as constants
@@ -20,12 +19,7 @@
 }
 
 
-#let title-slide(background-color: "blue", type-of-work: none, course: none, cycle: none, department: none, title-short: []) = slide[
-  #assert(type-of-work != none, message: "Type of work must be provided.")
-  #assert(course != none, message: "Course code and/or name must be provided.")
-  #assert(cycle != none, message: "Course cycle (e.g. Autumn 2026) must be provided.")
-  #assert(department != none, message: "Departement or faculty must be provided.")
-
+#let title-slide(background-color: "blue", type-of-work: [Type of work], course: [Course code], cycle: [Cycle], department: [Department], title-short: []) = slide[
   #set page(
     margin: 5mm,
     header: none,
@@ -88,7 +82,7 @@
     inset: 15%,
     fill: bg-colors.at(background-color).tint(100%),
 
-    grid(rows: (3fr, 4fr))[
+    grid(rows: (1fr, 1fr))[
       #heading(section-title, level: 1)
       #if section-title != [] { line(length: 100%) }
     ][]
@@ -103,8 +97,7 @@
   line(length: 100%)
   grid(
     columns: (2fr, 3fr, 2fr), align: (left, center, right),
-    // document.author.join([, ]),
-    query(<title-short>).first(default: (value: [])).value,
+    emph(query(<title-short>).first(default: (value: [])).value),
     {
       set par(leading: 0.4em)
       toolbox.current-section
@@ -116,7 +109,6 @@
 
 #let presentation-style(body, garamond-mathfont: false) = {
   // Initialize packages
-  // show: great-theorems-init
   show: codly-init
 
   // Set page style, headers and footers
@@ -137,7 +129,7 @@
   // Set text style
   set par(
     leading: constants.par-leading,
-    spacing: constants.par-spacing,
+    spacing: 1.0em,
     first-line-indent: constants.first-line-indent,
     justify: true
   )
@@ -149,26 +141,27 @@
 
   // Set heading styles
   set heading(offset: 1)  // Level 1 headings are only accessible via #section-slide
-  show heading: set block(above: 1em, below: 0.6em)
   show heading.where(level: 1): set text(
     size: 36pt,
     font: ("Adobe Garamond Pro", "Times New Roman"),
     weight: "semibold",
     fill: lu-bronze.tint(100%),
   )
+  show heading.where(level: 2): set block(above: 1.2em, below: 0.8em)
   show heading.where(level: 2): set text(
     size: 32pt,
     font: ("Adobe Garamond Pro", "Times New Roman"),
     weight: "semibold",
     fill: lu-bronze.tint(100%),
   )
+  show heading.where(level: 3): set block(above: 1.2em, below: 0.6em)
   show heading.where(level: 3): set text(
     size: 20pt,
     font: ("Frutiger LT Std", "Arial"),
     weight: "bold",
     fill: lu-bronze.tint(100%),
   )
-  show heading.where(level: 4): set block(above: 1.2em)
+  show heading.where(level: 4): set block(above: 1.2em, below: 0.6em)
   show heading.where(level: 4): set text(
     size: 14pt,
     font: ("Frutiger LT Std", "Arial"),
@@ -281,6 +274,13 @@
     above: constants.block-above + 0.5 * constants.par-leading,
     below: constants.block-below + 0.5 * constants.par-leading,
   )
+
+  // Style lists
+  set list(
+    marker: ([#sym.bullet], [#sym.bullet.tri], [--],).map(it => text(fill: lu-bronze.tint(100%), it)),
+  )
+  set enum(numbering: "1ai.")
+  set terms(hanging-indent: 1.5em)
 
   body
 }
