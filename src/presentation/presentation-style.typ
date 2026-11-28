@@ -19,7 +19,15 @@
 }
 
 
-#let title-slide(background-color: "blue", type-of-work: [Type of work], course: [Course code], cycle: [Cycle], department: [Department], title-short: []) = slide[
+#let title-slide(
+  background-color: "blue",
+  type-of-work: [Type of work],
+  course: [Course code],
+  cycle: [Cycle],
+  department: [Department],
+  title-short: [],
+  extra-line: [],
+) = slide[
   #set page(
     margin: 5mm,
     header: none,
@@ -48,7 +56,7 @@
           #set align(left)
 
           #title()
-          #line(length: 100%)
+          #divider()
           #grid(
             columns: (1fr, 1fr),
             row-gutter: 0.6em,
@@ -56,8 +64,9 @@
             context document.author.map(strong).join([, ]), text(0.75em, type-of-work),
             text(0.75em, department), text(0.75em)[#course, #cycle],
           )
+          #if extra-line != [] { text(0.75em, extra-line) }
         ]
-      ] 
+      ]
     )
     #metadata(title-short) <title-short>
   ]
@@ -94,7 +103,8 @@
 
 #let presentation-footer = context {
   set text(fill: lu-bronze.tint(100%), size: 16pt)
-  line(length: 100%)
+
+  divider()
   grid(
     columns: (2fr, 3fr, 2fr), align: (left, center, right),
     emph(query(<title-short>).first(default: (value: [])).value),
@@ -128,9 +138,8 @@
 
   // Set text style
   set par(
-    leading: constants.par-leading,
+    leading: 0.6em,
     spacing: 1.0em,
-    first-line-indent: constants.first-line-indent,
     justify: true
   )
   set text(
@@ -195,7 +204,7 @@
       (
         // 1, // Turn $cal()$ into $scr()$ ("more scripty")
         // 2, // Upright $integral$ signs
-        3, // More shaded blackboard bold letters
+        // 3, // More shaded blackboard bold letters
         // 4, // Devanagari digits
         // 5, // Smallcaps blackboard bold letters
         // 6, // Alternative lighter $cal()$
@@ -208,10 +217,9 @@
   )
   set math.mat(delim: "[")
 
-
   // Style footnotes
   show footnote: set text(fill: lu-grey.tint(100%))
-  show footnote.entry: set text(size: 16pt, fill: lu-grey.tint(100%))
+  show footnote.entry: set text(size: 14pt, fill: lu-grey.tint(100%))
   show footnote.entry: set align(right)
   set footnote.entry(
     separator: none,
@@ -220,6 +228,7 @@
 
   // Style lines
   set line(stroke: 0.8pt + lu-bronze.tint(100%))
+  show divider: set block(above: 1.2em, below: 1.0em)
 
   // Style code blocks
   codly(
@@ -250,7 +259,7 @@
   show outline.entry.where(level: 1): strong
 
   // Set citation style
-  set cite(style: "alphanumeric")
+  set cite(style: "chicago-shortened-notes")
 
   // Style tables
   set table(
@@ -277,7 +286,11 @@
 
   // Style lists
   set list(
-    marker: ([#sym.bullet], [#sym.bullet.tri], [--],).map(it => text(fill: lu-bronze.tint(100%), it)),
+    marker: (
+      [#sym.bullet],
+      [#scale(sym.bullet.tri, 130%, origin: bottom)],
+      [--],
+    ).map(it => text(fill: lu-bronze.tint(100%), it)),
   )
   set enum(numbering: "1ai.")
   set terms(hanging-indent: 1.5em)
